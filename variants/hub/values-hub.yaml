@@ -1,0 +1,99 @@
+clusterGroup:
+  name: hub
+  namespaces:
+    amx-app:
+    config-demo:
+    external-secrets-operator:
+      operatorGroup: true
+      targetNamespaces: []
+    external-secrets:
+    hello-world:
+    multicloud-gitops-amx:
+    open-cluster-management:
+    openshift-nfd:
+    vault:
+  projects:
+    - hub
+    - config-demo
+    - hello-world
+    - openshift-nfd
+    - amx-app
+  subscriptions:
+    acm:
+      name: advanced-cluster-management
+      namespace: open-cluster-management
+      channel: release-2.8
+    nfd:
+      name: nfd
+      namespace: openshift-nfd
+      channel: stable
+      source: redhat-operators
+    eso:
+      name: openshift-external-secrets-operator
+      namespace: external-secrets-operator
+      channel: stable-v1
+  applications:
+    acm:
+      name: acm
+      namespace: open-cluster-management
+      argoProject: hub
+      chart: acm
+      chartVersion: 0.2.*
+    amx-app:
+      name: amx-app
+      namespace: amx-app
+      project: amx-app
+      path: charts/all/amx-app
+    config-demo:
+      name: config-demo
+      namespace: config-demo
+      project: config-demo
+      path: charts/all/config-demo
+    openshift-external-secrets:
+      name: openshift-external-secrets
+      namespace: external-secrets
+      argoProject: hub
+      chart: openshift-external-secrets
+      chartVersion: 0.0.*
+    vault:
+      name: vault
+      namespace: vault
+      argoProject: hub
+      chart: hashicorp-vault
+      chartVersion: 0.1.*
+    hello-world:
+      name: hello-world
+      namespace: hello-world
+      project: hello-world
+      path: charts/all/hello-world
+    kustomize-renderer:
+      name: kustomize-renderer
+      namespace: multicloud-gitops-amx
+      path: common/examples/kustomize-renderer
+    letsencrypt:
+      name: letsencrypt
+      namespace: multicloud-gitops-amx
+      argoProject: hub
+      chart: letsencrypt
+      chartVersion: 0.1.*
+    nfd:
+      name: nfd
+      namespace: openshift-nfd
+      project: openshift-nfd
+      path: charts/all/nfd
+  imperative:
+    jobs:
+      - name: hello-world
+        # ansible playbook to be run
+        playbook: rhvp.cluster_utils.hello_world
+        # per playbook timeout in seconds
+        timeout: 234
+        # verbosity: "-v"  isHubCluster: true
+  managedClusterGroups:
+    exampleRegion:
+      name: group-one
+      acmlabels:
+        - name: clusterGroup
+          value: group-one
+  sharedValueFiles:
+    - /overrides/values-{{ $.Values.global.clusterPlatform }}.yaml
